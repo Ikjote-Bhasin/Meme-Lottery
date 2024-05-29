@@ -7,11 +7,82 @@
     <script src="https://unpkg.com/@stacks/connect@latest/dist/connect.umd.js"></script>
     <script src="https://unpkg.com/@stacks/transactions@latest/dist/transactions.umd.js"></script>
     <script src="https://unpkg.com/@stacks/network@latest/dist/network.umd.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin: 20px 0;
+        }
+        label, input, select {
+            display: block;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        .diamond-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 120px;
+            height: 120px;
+            transform: rotate(45deg);
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .diamond-content {
+            transform: rotate(-45deg);
+            text-align: center;
+        }
+        #buy-ticket-container {
+            text-align: center;
+        }
+        #connected-address {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <h1>Lottery DApp</h1>
 
     <button id="connect-wallet">Connect Wallet</button>
+
+    <div id="connected-address">Not connected</div>
+
+    <div id="buy-ticket-container">
+        <div class="diamond-container">
+            <div class="diamond-content">
+                <p>Block Height: <span id="block-height">Loading...</span></p>
+                <p>Pool Amount: <span id="pool-amount">Loading...</span></p>
+                <p>Countdown: <span id="countdown">--:--</span></p>
+            </div>
+        </div>
+        <h2>Buy a Ticket</h2>
+        <form id="buy-ticket-form">
+            <label for="round-id">Round ID:</label>
+            <input type="number" id="round-id" name="round-id" required>
+            <button type="submit">Buy Ticket</button>
+        </form>
+    </div>
 
     <h2>Create a New Round</h2>
     <form id="create-round-form">
@@ -26,13 +97,6 @@
         <button type="submit">Create Round</button>
     </form>
 
-    <h2>Buy a Ticket</h2>
-    <form id="buy-ticket-form">
-        <label for="round-id">Round ID:</label>
-        <input type="number" id="round-id" name="round-id" required>
-        <button type="submit">Buy Ticket</button>
-    </form>
-
     <h2>End a Round</h2>
     <form id="end-round-form">
         <label for="end-round-id">Round ID:</label>
@@ -42,13 +106,14 @@
 
     <script>
         const { StacksTestnet } = window.StacksNetwork;
-        const { standardPrincipalCV, uintCV, principalCV, trueCV, makeContractCall, broadcastTransaction } = window.StacksTransactions;
+        const { standardPrincipalCV, uintCV, principalCV, makeContractCall, broadcastTransaction } = window.StacksTransactions;
         const { showConnect, UserSession, AppConfig } = window.StacksConnect;
 
         const appConfig = new AppConfig(['store_write', 'publish_data']);
         const userSession = new UserSession({ appConfig });
 
         const network = new StacksTestnet();
+        let countdownInterval;
 
         document.getElementById('connect-wallet').onclick = function () {
             showConnect({
@@ -59,15 +124,27 @@
                 userSession,
                 onFinish: () => {
                     const userData = userSession.loadUserData();
-                    alert('Wallet connected: ' + userData.profile.stxAddress.testnet);
+                    document.getElementById('connected-address').innerText = 'Connected: ' + userData.profile.stxAddress.testnet;
                 },
             });
         };
 
+        async function fetchBlockHeight() {
+            const response = await fetch(network.coreApiUrl + '/v2/info');
+            const data = await response.json();
+            document.getElementById('block-height').innerText = data.stacks_tip_height;
+        }
+
+        async function fetchPoolAmount(roundId) {
+            // Fetch pool amount logic (you may need to implement an API call to get this information)
+            // For demonstration purposes, we are setting it to a static value
+            document.getElementById('pool-amount').innerText = '1000 STX';
+        }
+
         async function submitTransaction(functionName, functionArgs) {
             const options = {
                 contractAddress: 'SP3NE50GEXFG9SZGTT51P40X2CKYSZ5CC4ZTZ7A2G', // Replace with your contract address
-                contractName: 'functions.clar', // Replace with your contract name
+                contractName: 'functions', // Replace with your contract name
                 functionName,
                 functionArgs,
                 network,
@@ -97,6 +174,33 @@
             const roundId = document.getElementById('end-round-id').value;
             submitTransaction('end-round', [uintCV(parseInt(roundId))]);
         };
+
+        function startCountdown(duration) {
+            clearInterval(countdownInterval);
+            let timer = duration, minutes, seconds;
+            countdownInterval = setInterval(() => {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                document.getElementById('countdown').innerText = `${minutes}:${seconds}`;
+                if (--timer < 0) {
+                    timer = duration;
+                    endRoundAndSelectWinner(); // Automatically end the round and select the winner every 2 minutes
+                }
+            }, 1000);
+        }
+
+        async function endRoundAndSelectWinner() {
+            // Add logic to end the current round and select a winner
+            // For now, we'll just display an alert for demonstration
+            alert('Round ended and winner selected!');
+        }
+
+        fetchBlockHeight();
+        setInterval(fetchBlockHeight, 60000); // Update block height every minute
+
+        startCountdown(120); // Start 2-minute countdown
     </script>
 </body>
 </html>
