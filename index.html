@@ -59,17 +59,11 @@
             margin-top: 20px;
             font-weight: bold;
         }
-        #create-round-container, #end-round-container {
+        #end-round-container {
             position: absolute;
             top: 50%;
-            transform: translateY(-50%);
-        }
-        #create-round-container {
-            left: 10%;
-            text-align: left;
-        }
-        #end-round-container {
             right: 10%;
+            transform: translateY(-50%);
             text-align: left;
         }
         #winner-info {
@@ -141,7 +135,7 @@
 
     <div id="info-container">
         <div class="info-box">
-            <p>Block Height: <span id="block-height">Loading...</span></p>
+            <p>Remaining Time: <span id="countdown">--:--</span></p>
         </div>
         <div class="info-box">
             <p>Pool Amount: <span id="pool-amount">Loading...</span></p>
@@ -159,15 +153,6 @@
                 </form>
             </div>
         </div>
-    </div>
-
-    <div id="create-round-container">
-        <h2>Create a New Round</h2>
-        <form id="create-round-form">
-            <label for="end-height">End Height:</label>
-            <input type="number" id="end-height" name="end-height" required>
-            <button type="submit">Create Round</button>
-        </form>
     </div>
 
     <div id="end-round-container">
@@ -228,12 +213,6 @@
             const result = await broadcastTransaction(transaction, network);
             alert(`${functionName} executed: ${result.txid}`);
         }
-
-        document.getElementById('create-round-form').onsubmit = function (event) {
-            event.preventDefault();
-            const endHeight = document.getElementById('end-height').value;
-            submitTransaction('create-round', [uintCV(parseInt(endHeight))]);
-        };
 
         document.getElementById('buy-ticket-form').onsubmit = function (event) {
             event.preventDefault();
