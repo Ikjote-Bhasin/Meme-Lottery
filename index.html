@@ -193,10 +193,11 @@
                     network: {
                         type: 'Testnet', // Change to 'Mainnet' for production
                     },
+                    onFinish: (response) => {
+                        const address = response.address;
+                        document.getElementById('connected-address').innerText = 'Connected: ' + address;
+                    }
                 });
-
-                const address = response.address;
-                document.getElementById('connected-address').innerText = 'Connected: ' + address;
             } catch (error) {
                 console.error('Error connecting to wallet:', error);
             }
@@ -291,3 +292,4 @@
     </script>
 </body>
 </html>
+
