@@ -149,6 +149,12 @@
                 <form id="buy-ticket-form" class="submit-container">
                     <label for="round-id" class="sm-text">Round ID:</label>
                     <input type="number" id="round-id" name="round-id" class="amount" placeholder="Enter Round ID" required>
+                    <label for="token-contract" class="sm-text">Token:</label>
+                    <select id="token-contract" name="token-contract" required>
+                        <option value="SP3NE50GEXFG9SZGTT51P40X2CKYSZ5CC4ZTZ7A2G.welshcorgicoin-token">Welshcorgicoin ($WELSH)</option>
+                        <option value="SP1AY6K3PQV5MRT6R4S671NWW2FRVPKM0BR162CT6.leo-token">LEO ($LEO)</option>
+                        <option value="SP1N4EXSR8DP5GRN2XCWZEW9PR32JHNRYW7MVPNTA.PomerenianBoo-Pomboo">Pomeranian Boo ($POMBOO)</option>
+                    </select>
                     <button type="submit">Buy Ticket</button>
                 </form>
             </div>
@@ -217,7 +223,8 @@
         document.getElementById('buy-ticket-form').onsubmit = function (event) {
             event.preventDefault();
             const roundId = document.getElementById('round-id').value;
-            submitTransaction('buy-ticket', [uintCV(parseInt(roundId))]);
+            const tokenContract = document.getElementById('token-contract').value;
+            submitTransaction('buy-ticket', [uintCV(parseInt(roundId)), principalCV(tokenContract)]);
         };
 
         function showWinner(blockHeight, winner) {
