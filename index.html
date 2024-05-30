@@ -59,6 +59,51 @@
             margin-top: 20px;
             font-weight: bold;
         }
+        #create-round-container, #end-round-container {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        #create-round-container {
+            left: 10%;
+            text-align: left;
+        }
+        #end-round-container {
+            right: 10%;
+            text-align: left;
+        }
+        #winner-info {
+            display: none;
+        }
+        #buy-ticket-form {
+            margin-bottom: 1rem;
+            position: relative;
+            padding: 20px;
+            border: 1px solid #ffffff05;
+            border-radius: 8px;
+            background: #f5f7fa0a;
+        }
+        #buy-ticket-form label, #buy-ticket-form input, #buy-ticket-form button {
+            margin: 10px 0;
+        }
+        #buy-ticket-form .amount {
+            background-color: initial;
+            border-width: 0;
+            box-shadow: 0 0 #0000, 0 0 #0000, var(--tw-shadow);
+            color: #ffffff;
+            display: block;
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 1;
+            margin-bottom: 0;
+            outline-width: 0;
+            padding: 0;
+            width: 95%;
+        }
+        #buy-ticket-form .amount:focus {
+            box-shadow: none;
+            outline: 0;
+        }
     </style>
 </head>
 <body>
@@ -79,30 +124,26 @@
         <h2>Buy a Ticket</h2>
         <form id="buy-ticket-form">
             <label for="round-id">Round ID:</label>
-            <input type="number" id="round-id" name="round-id" required>
+            <input type="number" id="round-id" name="round-id" class="amount" required>
             <button type="submit">Buy Ticket</button>
         </form>
     </div>
 
-    <h2>Create a New Round</h2>
-    <form id="create-round-form">
-        <label for="end-height">End Height:</label>
-        <input type="number" id="end-height" name="end-height" required>
-        <label for="token-contract">Token:</label>
-        <select id="token-contract" name="token-contract" required>
-            <option value="SP3NE50GEXFG9SZGTT51P40X2CKYSZ5CC4ZTZ7A2G.welshcorgicoin-token">Welshcorgicoin ($WELSH)</option>
-            <option value="SP1AY6K3PQV5MRT6R4S671NWW2FRVPKM0BR162CT6.leo-token">LEO ($LEO)</option>
-            <option value="SP1N4EXSR8DP5GRN2XCWZEW9PR32JHNRYW7MVPNTA.PomerenianBoo-Pomboo">Pomeranian Boo ($POMBOO)</option>
-        </select>
-        <button type="submit">Create Round</button>
-    </form>
+    <div id="create-round-container">
+        <h2>Create a New Round</h2>
+        <form id="create-round-form">
+            <label for="end-height">End Height:</label>
+            <input type="number" id="end-height" name="end-height" required>
+            <button type="submit">Create Round</button>
+        </form>
+    </div>
 
-    <h2>End a Round</h2>
-    <form id="end-round-form">
-        <label for="end-round-id">Round ID:</label>
-        <input type="number" id="end-round-id" name="end-round-id" required>
-        <button type="submit">End Round</button>
-    </form>
+    <div id="end-round-container">
+        <div id="winner-info">
+            <p>Block Height: <span id="end-block-height">Loading...</span></p>
+            <p>Winner: <span id="winner">Loading...</span></p>
+        </div>
+    </div>
 
     <script>
         const { StacksTestnet } = window.StacksNetwork;
@@ -159,8 +200,7 @@
         document.getElementById('create-round-form').onsubmit = function (event) {
             event.preventDefault();
             const endHeight = document.getElementById('end-height').value;
-            const tokenContract = document.getElementById('token-contract').value;
-            submitTransaction('create-round', [uintCV(parseInt(endHeight)), principalCV(tokenContract)]);
+            submitTransaction('create-round', [uintCV(parseInt(endHeight))]);
         };
 
         document.getElementById('buy-ticket-form').onsubmit = function (event) {
@@ -169,11 +209,11 @@
             submitTransaction('buy-ticket', [uintCV(parseInt(roundId))]);
         };
 
-        document.getElementById('end-round-form').onsubmit = function (event) {
-            event.preventDefault();
-            const roundId = document.getElementById('end-round-id').value;
-            submitTransaction('end-round', [uintCV(parseInt(roundId))]);
-        };
+        function showWinner(blockHeight, winner) {
+            document.getElementById('end-block-height').innerText = blockHeight;
+            document.getElementById('winner').innerText = winner;
+            document.getElementById('winner-info').style.display = 'block';
+        }
 
         function startCountdown(duration) {
             clearInterval(countdownInterval);
@@ -192,9 +232,12 @@
         }
 
         async function endRoundAndSelectWinner() {
-            // Add logic to end the current round and select a winner
-            // For now, we'll just display an alert for demonstration
-            alert('Round ended and winner selected!');
+            const roundId = document.getElementById('round-id').value;
+            // Call end-round function and get winner (simplified for demonstration)
+            await submitTransaction('end-round', [uintCV(parseInt(roundId))]);
+            const blockHeight = await fetchBlockHeight();
+            const winner = 'mock-winner-address'; // Replace with actual logic to get the winner
+            showWinner(blockHeight, winner);
         }
 
         fetchBlockHeight();
