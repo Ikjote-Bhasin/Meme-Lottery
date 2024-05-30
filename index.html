@@ -75,21 +75,44 @@
         #winner-info {
             display: none;
         }
-        #buy-ticket-form {
-            margin-bottom: 1rem;
-            position: relative;
+        .submit-main .submit-box .submit-container {
+            align-self: stretch;
+            background: #f5f7fa08;
+            border: 1px solid #f5f7fa14;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             padding: 20px;
-            border: 1px solid #ffffff05;
-            border-radius: 8px;
-            background: #f5f7fa0a;
         }
-        #buy-ticket-form label, #buy-ticket-form input, #buy-ticket-form button {
-            margin: 10px 0;
+        .submit-main .submit-box .submit-container .sm-text {
+            font-size: .875rem;
+            line-height: 1.25rem;
+            margin-bottom: 0;
+            color: #f5f7fa5c;
         }
-        #buy-ticket-form .amount {
+        @media (min-width: 768px) {
+            .submit-main .submit-box .submit-container .sm-text {
+                font-size: 1rem;
+                line-height: 1.5rem;
+            }
+        }
+        .submit-main .submit-box .submit-container .lg-text {
+            font-size: .875rem;
+            line-height: 1.25rem;
+            margin-bottom: 0;
+            color: var(--text-dark-500);
+        }
+        @media (min-width: 768px) {
+            .submit-main .submit-box .submit-container .lg-text {
+                font-size: 1.125rem;
+                line-height: 1.75rem;
+            }
+        }
+        .submit-main .submit-box .submit-container .amount {
             background-color: initial;
             border-width: 0;
-            box-shadow: 0 0 #0000, 0 0 #0000, var(--tw-shadow);
+            box-shadow: none;
             color: #ffffff;
             display: block;
             font-size: 24px;
@@ -100,9 +123,12 @@
             padding: 0;
             width: 95%;
         }
-        #buy-ticket-form .amount:focus {
+        .submit-main .submit-box .submit-container .amount:focus {
             box-shadow: none;
             outline: 0;
+        }
+        .submit-main .submit-box .submit-container .amount::placeholder {
+            color: #f5f7fa5c;
         }
     </style>
 </head>
@@ -122,11 +148,15 @@
             </div>
         </div>
         <h2>Buy a Ticket</h2>
-        <form id="buy-ticket-form">
-            <label for="round-id">Round ID:</label>
-            <input type="number" id="round-id" name="round-id" class="amount" required>
-            <button type="submit">Buy Ticket</button>
-        </form>
+        <div class="submit-main">
+            <div class="submit-box">
+                <form id="buy-ticket-form" class="submit-container">
+                    <label for="round-id" class="sm-text">Round ID:</label>
+                    <input type="number" id="round-id" name="round-id" class="amount" placeholder="Enter Round ID" required>
+                    <button type="submit">Buy Ticket</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <div id="create-round-container">
