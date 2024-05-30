@@ -71,19 +71,20 @@
         }
         .submit-main .submit-box .submit-container {
             align-self: stretch;
-            background: #f5f7fa08;
-            border: 1px solid #f5f7fa14;
+            background: #fff;
+            border: 1px solid #ddd;
             border-radius: 6px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 20px;
+            margin: 20px 0;
         }
         .submit-main .submit-box .submit-container .sm-text {
             font-size: .875rem;
             line-height: 1.25rem;
             margin-bottom: 0;
-            color: #f5f7fa5c;
+            color: #333;
         }
         @media (min-width: 768px) {
             .submit-main .submit-box .submit-container .sm-text {
@@ -91,38 +92,36 @@
                 line-height: 1.5rem;
             }
         }
-        .submit-main .submit-box .submit-container .lg-text {
-            font-size: .875rem;
-            line-height: 1.25rem;
-            margin-bottom: 0;
-            color: var(--text-dark-500);
-        }
-        @media (min-width: 768px) {
-            .submit-main .submit-box .submit-container .lg-text {
-                font-size: 1.125rem;
-                line-height: 1.75rem;
-            }
-        }
         .submit-main .submit-box .submit-container .amount {
             background-color: initial;
-            border-width: 0;
+            border-width: 1px;
+            border-color: #ccc;
             box-shadow: none;
-            color: #ffffff;
+            color: #333;
             display: block;
             font-size: 24px;
             font-weight: 500;
             line-height: 1;
             margin-bottom: 0;
             outline-width: 0;
-            padding: 0;
-            width: 95%;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
         }
         .submit-main .submit-box .submit-container .amount:focus {
             box-shadow: none;
             outline: 0;
         }
         .submit-main .submit-box .submit-container .amount::placeholder {
-            color: #f5f7fa5c;
+            color: #aaa;
+        }
+        .submit-main .submit-box .submit-container .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .submit-main .submit-box .submit-container .buttons-container button {
+            width: 30%;
         }
     </style>
 </head>
@@ -155,6 +154,13 @@
                         <option value="SP1AY6K3PQV5MRT6R4S671NWW2FRVPKM0BR162CT6.leo-token">LEO ($LEO)</option>
                         <option value="SP1N4EXSR8DP5GRN2XCWZEW9PR32JHNRYW7MVPNTA.PomerenianBoo-Pomboo">Pomeranian Boo ($POMBOO)</option>
                     </select>
+                    <label for="token-amount" class="sm-text">Amount:</label>
+                    <input type="number" id="token-amount" name="token-amount" class="amount" placeholder="Enter Amount" required>
+                    <div class="buttons-container">
+                        <button type="button" id="btn-25">25%</button>
+                        <button type="button" id="btn-50">50%</button>
+                        <button type="button" id="btn-max">Max</button>
+                    </div>
                     <button type="submit">Buy Ticket</button>
                 </form>
             </div>
@@ -224,7 +230,8 @@
             event.preventDefault();
             const roundId = document.getElementById('round-id').value;
             const tokenContract = document.getElementById('token-contract').value;
-            submitTransaction('buy-ticket', [uintCV(parseInt(roundId)), principalCV(tokenContract)]);
+            const tokenAmount = document.getElementById('token-amount').value;
+            submitTransaction('buy-ticket', [uintCV(parseInt(roundId)), principalCV(tokenContract), uintCV(parseInt(tokenAmount))]);
         };
 
         function showWinner(blockHeight, winner) {
@@ -257,6 +264,24 @@
             const winner = 'mock-winner-address'; // Replace with actual logic to get the winner
             showWinner(blockHeight, winner);
         }
+
+        document.getElementById('btn-25').onclick = function () {
+            const amountInput = document.getElementById('token-amount');
+            const maxAmount = 1000; // Replace with actual logic to get max amount
+            amountInput.value = maxAmount * 0.25;
+        };
+
+        document.getElementById('btn-50').onclick = function () {
+            const amountInput = document.getElementById('token-amount');
+            const maxAmount = 1000; // Replace with actual logic to get max amount
+            amountInput.value = maxAmount * 0.5;
+        };
+
+        document.getElementById('btn-max').onclick = function () {
+            const amountInput = document.getElementById('token-amount');
+            const maxAmount = 1000; // Replace with actual logic to get max amount
+            amountInput.value = maxAmount;
+        };
 
         fetchBlockHeight();
         setInterval(fetchBlockHeight, 60000); // Update block height every minute
