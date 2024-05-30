@@ -189,10 +189,16 @@
         document.getElementById('connect-wallet').onclick = async function () {
             try {
                 const response = await getAddress({
-                    payload: {},
-                    network: {
-                        type: 'Testnet', // Change to 'Mainnet' for production
+                    payload: {
+                        appDetails: {
+                            name: "Lottery DApp",
+                            icon: window.location.origin + '/path/to/your/icon.png'
+                        }
                     },
+                    network: {
+                        type: 'Testnet' // Change to 'Mainnet' for production
+                    },
+                    apiKey: "cf615e7cbcb9f7f6bad1344406db5e20",
                     onFinish: (response) => {
                         const address = response.address;
                         document.getElementById('connected-address').innerText = 'Connected: ' + address;
@@ -292,4 +298,3 @@
     </script>
 </body>
 </html>
-
