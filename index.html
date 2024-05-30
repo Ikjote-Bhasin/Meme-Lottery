@@ -146,8 +146,6 @@
         <div class="submit-main">
             <div class="submit-box">
                 <form id="buy-ticket-form" class="submit-container">
-                    <label for="round-id" class="sm-text">Round ID:</label>
-                    <input type="number" id="round-id" name="round-id" class="amount" placeholder="Enter Round ID" required>
                     <label for="token-contract" class="sm-text">Token:</label>
                     <select id="token-contract" name="token-contract" required>
                         <option value="SP3NE50GEXFG9SZGTT51P40X2CKYSZ5CC4ZTZ7A2G.welshcorgicoin-token">Welshcorgicoin ($WELSH)</option>
@@ -228,10 +226,9 @@
 
         document.getElementById('buy-ticket-form').onsubmit = function (event) {
             event.preventDefault();
-            const roundId = document.getElementById('round-id').value;
             const tokenContract = document.getElementById('token-contract').value;
             const tokenAmount = document.getElementById('token-amount').value;
-            submitTransaction('buy-ticket', [uintCV(parseInt(roundId)), principalCV(tokenContract), uintCV(parseInt(tokenAmount))]);
+            submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(parseInt(tokenAmount))]);
         };
 
         function showWinner(blockHeight, winner) {
@@ -257,9 +254,8 @@
         }
 
         async function endRoundAndSelectWinner() {
-            const roundId = document.getElementById('round-id').value;
             // Call end-round function and get winner (simplified for demonstration)
-            await submitTransaction('end-round', [uintCV(parseInt(roundId))]);
+            await submitTransaction('end-round', []);
             const blockHeight = await fetchBlockHeight();
             const winner = 'mock-winner-address'; // Replace with actual logic to get the winner
             showWinner(blockHeight, winner);
