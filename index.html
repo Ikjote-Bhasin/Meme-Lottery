@@ -135,10 +135,10 @@
 
     <div id="info-container">
         <div class="info-box">
-            <p>Remaining Time: <span id="countdown">--:--</span></p>
+            <p>Remaining Time: <span id="countdown">02:00</span></p>
         </div>
         <div class="info-box">
-            <p>Pool Amount: <span id="pool-amount">Loading...</span></p>
+            <p>Pool Amount: <span id="pool-amount">0 STX</span></p>
         </div>
     </div>
 
@@ -182,7 +182,10 @@
         const userSession = new UserSession({ appConfig });
 
         const network = new StacksTestnet();
+        network.coreApiUrl = 'https://stacks-node-api.devnet.stacks.co';
+
         let countdownInterval;
+        let poolAmount = 0;
 
         const { getAddress } = SatsConnect;
 
@@ -196,7 +199,7 @@
                         }
                     },
                     network: {
-                        type: 'Testnet' // Change to 'Mainnet' for production
+                        type: 'Devnet' // Use 'Devnet' for development
                     },
                     apiKey: "cf615e7cbcb9f7f6bad1344406db5e20",
                     onFinish: (response) => {
@@ -212,13 +215,12 @@
         async function fetchBlockHeight() {
             const response = await fetch(network.coreApiUrl + '/v2/info');
             const data = await response.json();
-            document.getElementById('block-height').innerText = data.stacks_tip_height;
+            document.getElementById('end-block-height').innerText = data.stacks_tip_height;
         }
 
-        async function fetchPoolAmount(roundId) {
-            // Fetch pool amount logic (you may need to implement an API call to get this information)
-            // For demonstration purposes, we are setting it to a static value
-            document.getElementById('pool-amount').innerText = '1000 STX';
+        async function fetchPoolAmount() {
+            // For demonstration purposes, we're setting it to a static value
+            document.getElementById('pool-amount').innerText = `${poolAmount} STX`;
         }
 
         async function submitTransaction(functionName, functionArgs) {
@@ -239,8 +241,10 @@
         document.getElementById('buy-ticket-form').onsubmit = function (event) {
             event.preventDefault();
             const tokenContract = document.getElementById('token-contract').value;
-            const tokenAmount = document.getElementById('token-amount').value;
-            submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(parseInt(tokenAmount))]);
+            const tokenAmount = parseInt(document.getElementById('token-amount').value);
+            poolAmount += tokenAmount;
+            fetchPoolAmount();
+            submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(tokenAmount)]);
         };
 
         function showWinner(blockHeight, winner) {
@@ -252,15 +256,18 @@
         function startCountdown(duration) {
             clearInterval(countdownInterval);
             let timer = duration, minutes, seconds;
-            countdownInterval = setInterval(() => {
+            countdownInterval = setInterval(async () => {
                 minutes = parseInt(timer / 60, 10);
                 seconds = parseInt(timer % 60, 10);
                 minutes = minutes < 10 ? "0" + minutes : minutes;
                 seconds = seconds < 10 ? "0" + seconds : seconds;
                 document.getElementById('countdown').innerText = `${minutes}:${seconds}`;
                 if (--timer < 0) {
-                    timer = duration;
-                    endRoundAndSelectWinner(); // Automatically end the round and select the winner every 2 minutes
+                    clearInterval(countdownInterval);
+                    await endRoundAndSelectWinner();
+                    setTimeout(() => {
+                        startCountdown(120); // Restart 2-minute countdown
+                    }, 5000);
                 }
             }, 1000);
         }
