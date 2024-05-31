@@ -218,9 +218,9 @@
             document.getElementById('end-block-height').innerText = data.stacks_tip_height;
         }
 
-        async function fetchPoolAmount() {
-            // For demonstration purposes, we're setting it to a static value
-            document.getElementById('pool-amount').innerText = `${poolAmount} STX`;
+        function updatePoolAmountDisplay() {
+            const poolAmountContainer = document.getElementById('pool-amount');
+            poolAmountContainer.innerText = `${poolAmount} STX`;
         }
 
         async function submitTransaction(functionName, functionArgs) {
@@ -242,8 +242,9 @@
             event.preventDefault();
             const tokenContract = document.getElementById('token-contract').value;
             const tokenAmount = parseInt(document.getElementById('token-amount').value);
+            const tokenName = document.getElementById('token-contract').selectedOptions[0].text;
             poolAmount += tokenAmount;
-            fetchPoolAmount();
+            updatePoolAmountDisplay();
             submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(tokenAmount)]);
         };
 
@@ -301,7 +302,7 @@
         fetchBlockHeight();
         setInterval(fetchBlockHeight, 60000); // Update block height every minute
 
-        startCountdown(120); // Start 2-minute countdown
+        startCountdown(120); // Automatically start 2-minute countdown
     </script>
 </body>
 </html>
