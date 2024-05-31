@@ -22,7 +22,7 @@
             padding: 20px;
         }
         h1, h2 {
-            color: #333;
+            color: #fff;
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
         form {
@@ -230,7 +230,6 @@
                 functionName: 'get-pool-amount', // Replace with the actual function to get pool amount
                 functionArgs,
                 network,
-                senderAddress: userSession.loadUserData().profile.stxAddress.testnet,
             };
 
             const result = await callReadOnlyFunction(options);
@@ -263,7 +262,6 @@
             event.preventDefault();
             const tokenContract = document.getElementById('token-contract').value;
             const tokenAmount = parseInt(document.getElementById('token-amount').value);
-            const tokenName = document.getElementById('token-contract').selectedOptions[0].text;
             submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(tokenAmount)]);
         };
 
