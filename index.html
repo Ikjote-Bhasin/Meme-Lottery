@@ -135,10 +135,10 @@
 
     <div id="info-container">
         <div class="info-box">
-            <p>Remaining Time: <span id="countdown">02:00</span></p>
+            <p>Remaining Time: <span id="countdown">--:--</span></p>
         </div>
         <div class="info-box">
-            <p>Pool Amount: <span id="pool-amount">0 STX</span></p>
+            <p>Pool Amount: <span id="pool-amount">Loading...</span></p>
         </div>
     </div>
 
@@ -182,10 +182,7 @@
         const userSession = new UserSession({ appConfig });
 
         const network = new StacksTestnet();
-        network.coreApiUrl = 'https://stacks-node-api.devnet.stacks.co';
-
         let countdownInterval;
-        let poolAmount = 0;
 
         const { getAddress } = SatsConnect;
 
@@ -199,7 +196,7 @@
                         }
                     },
                     network: {
-                        type: 'Devnet' // Use 'Devnet' for development
+                        type: 'Testnet' // Change to 'Mainnet' for production
                     },
                     apiKey: "cf615e7cbcb9f7f6bad1344406db5e20",
                     onFinish: (response) => {
@@ -215,12 +212,13 @@
         async function fetchBlockHeight() {
             const response = await fetch(network.coreApiUrl + '/v2/info');
             const data = await response.json();
-            document.getElementById('end-block-height').innerText = data.stacks_tip_height;
+            document.getElementById('block-height').innerText = data.stacks_tip_height;
         }
 
-        function updatePoolAmountDisplay() {
-            const poolAmountContainer = document.getElementById('pool-amount');
-            poolAmountContainer.innerText = `${poolAmount} STX`;
+        async function fetchPoolAmount(roundId) {
+            // Fetch pool amount logic (you may need to implement an API call to get this information)
+            // For demonstration purposes, we are setting it to a static value
+            document.getElementById('pool-amount').innerText = '1000 STX';
         }
 
         async function submitTransaction(functionName, functionArgs) {
@@ -241,11 +239,8 @@
         document.getElementById('buy-ticket-form').onsubmit = function (event) {
             event.preventDefault();
             const tokenContract = document.getElementById('token-contract').value;
-            const tokenAmount = parseInt(document.getElementById('token-amount').value);
-            const tokenName = document.getElementById('token-contract').selectedOptions[0].text;
-            poolAmount += tokenAmount;
-            updatePoolAmountDisplay();
-            submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(tokenAmount)]);
+            const tokenAmount = document.getElementById('token-amount').value;
+            submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(parseInt(tokenAmount))]);
         };
 
         function showWinner(blockHeight, winner) {
@@ -257,18 +252,15 @@
         function startCountdown(duration) {
             clearInterval(countdownInterval);
             let timer = duration, minutes, seconds;
-            countdownInterval = setInterval(async () => {
+            countdownInterval = setInterval(() => {
                 minutes = parseInt(timer / 60, 10);
                 seconds = parseInt(timer % 60, 10);
                 minutes = minutes < 10 ? "0" + minutes : minutes;
                 seconds = seconds < 10 ? "0" + seconds : seconds;
                 document.getElementById('countdown').innerText = `${minutes}:${seconds}`;
                 if (--timer < 0) {
-                    clearInterval(countdownInterval);
-                    await endRoundAndSelectWinner();
-                    setTimeout(() => {
-                        startCountdown(120); // Restart 2-minute countdown
-                    }, 5000);
+                    timer = duration;
+                    endRoundAndSelectWinner(); // Automatically end the round and select the winner every 2 minutes
                 }
             }, 1000);
         }
@@ -302,7 +294,7 @@
         fetchBlockHeight();
         setInterval(fetchBlockHeight, 60000); // Update block height every minute
 
-        startCountdown(120); // Automatically start 2-minute countdown
+        startCountdown(120); // Start 2-minute countdown
     </script>
 </body>
 </html>
