@@ -3,32 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A decentralized lottery application built on Stacks blockchain.">
-    <meta name="keywords" content="Lottery, DApp, Stacks, Blockchain, Crypto">
     <title>Lottery DApp</title>
+    <script src="https://unpkg.com/@walletconnect/client@latest/dist/umd/index.min.js"></script>
     <script src="https://unpkg.com/@stacks/connect@latest/dist/connect.umd.js"></script>
     <script src="https://unpkg.com/@stacks/transactions@latest/dist/transactions.umd.js"></script>
     <script src="https://unpkg.com/@stacks/network@latest/dist/network.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sats-connect@latest/dist/sats-connect.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            height: 100vh;
             background-color: #f0f2f5;
             margin: 0;
-            padding: 20px;
         }
         h1 {
             color: #333;
-        }
-        form {
-            margin: 20px 0;
-        }
-        label, input, select {
-            display: block;
-            margin: 10px 0;
         }
         button {
             padding: 10px 20px;
@@ -39,292 +31,97 @@
             border: none;
             border-radius: 5px;
         }
-        #connect-wallet {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        #info-container {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 800px;
-            margin: 20px 0;
-        }
-        .info-box {
-            background-color: #007bff;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            flex: 1;
-            margin: 0 10px;
-        }
-        #buy-ticket-container {
-            text-align: center;
-        }
         #connected-address {
             margin-top: 20px;
             font-weight: bold;
         }
-        #end-round-container {
-            position: absolute;
-            top: 50%;
-            right: 10%;
-            transform: translateY(-50%);
-            text-align: left;
-        }
-        #winner-info {
-            display: none;
-        }
-        .submit-main .submit-box .submit-container {
-            align-self: stretch;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        .submit-main .submit-box .submit-container .sm-text {
-            font-size: .875rem;
-            line-height: 1.25rem;
-            margin-bottom: 0;
-            color: #333;
-        }
-        @media (min-width: 768px) {
-            .submit-main .submit-box .submit-container .sm-text {
-                font-size: 1rem;
-                line-height: 1.5rem;
-            }
-        }
-        .submit-main .submit-box .submit-container .amount {
-            background-color: initial;
-            border-width: 1px;
-            border-color: #ccc;
-            box-shadow: none;
-            color: #333;
-            display: block;
-            font-size: 24px;
-            font-weight: 500;
-            line-height: 1;
-            margin-bottom: 0;
-            outline-width: 0;
-            padding: 10px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .submit-main .submit-box .submit-container .amount:focus {
-            box-shadow: none;
-            outline: 0;
-        }
-        .submit-main .submit-box .submit-container .amount::placeholder {
-            color: #aaa;
-        }
-        .submit-main .submit-box .submit-container .buttons-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-        .submit-main .submit-box .submit-container .buttons-container button {
-            width: 30%;
-        }
     </style>
 </head>
 <body>
-    <h1>Lottery DApp</h1>
-
+    <h1>Connect Wallet Example</h1>
     <button id="connect-wallet">Connect Wallet</button>
-
+    <button id="participate" style="display: none;">Participate in Lottery</button>
     <div id="connected-address">Not connected</div>
 
-    <div id="info-container">
-        <div class="info-box">
-            <p>Remaining Time: <span id="countdown">--:--</span></p>
-        </div>
-        <div class="info-box">
-            <p>Pool Amount: <span id="pool-amount">Loading...</span></p>
-        </div>
-    </div>
-
-    <div id="buy-ticket-container">
-        <h2>Buy a Ticket</h2>
-        <div class="submit-main">
-            <div class="submit-box">
-                <form id="buy-ticket-form" class="submit-container">
-                    <label for="token-contract" class="sm-text">Token:</label>
-                    <select id="token-contract" name="token-contract" required>
-                        <option value="SP3NE50GEXFG9SZGTT51P40X2CKYSZ5CC4ZTZ7A2G.welshcorgicoin-token">Welshcorgicoin ($WELSH)</option>
-                        <option value="SP1AY6K3PQV5MRT6R4S671NWW2FRVPKM0BR162CT6.leo-token">LEO ($LEO)</option>
-                        <option value="SP1N4EXSR8DP5GRN2XCWZEW9PR32JHNRYW7MVPNTA.PomerenianBoo-Pomboo">Pomeranian Boo ($POMBOO)</option>
-                    </select>
-                    <label for="token-amount" class="sm-text">Amount:</label>
-                    <input type="number" id="token-amount" name="token-amount" class="amount" placeholder="Enter Amount" required>
-                    <div class="buttons-container">
-                        <button type="button" id="btn-25">25%</button>
-                        <button type="button" id="btn-50">50%</button>
-                        <button type="button" id="btn-max">Max</button>
-                    </div>
-                    <button type="submit">Buy Ticket</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="end-round-container">
-        <div id="winner-info">
-            <p>Block Height: <span id="end-block-height">Loading...</span></p>
-            <p>Winner: <span id="winner">Loading...</span></p>
-        </div>
-    </div>
-
     <script>
-        const { StacksTestnet } = window.StacksNetwork;
         const { standardPrincipalCV, uintCV, principalCV, makeContractCall, broadcastTransaction } = window.StacksTransactions;
-        const { showConnect, UserSession, AppConfig } = window.StacksConnect;
-
-        const appConfig = new AppConfig(['store_write', 'publish_data']);
-        const userSession = new UserSession({ appConfig });
+        const { StacksTestnet } = window.StacksNetwork;
 
         const network = new StacksTestnet();
-        let countdownInterval;
-        let roundEndTime;
+        const contractAddress = 'SP3NE50GEXFG9SZGTT51P40X2CKYSZ5CC4ZTZ7A2G'; // Replace with your contract address
+        const contractName = 'lottery'; // Replace with your contract name
 
-        const { getAddress } = SatsConnect;
+        let walletConnector;
 
         document.getElementById('connect-wallet').onclick = async function () {
-            try {
-                const response = await getAddress({
-                    payload: {
-                        appDetails: {
-                            name: "Lottery DApp",
-                            icon: window.location.origin + '/path/to/your/icon.png'
-                        }
-                    },
-                    network: {
-                        type: 'Testnet' // Change to 'Mainnet' for production
-                    },
-                    apiKey: "cf615e7cbcb9f7f6bad1344406db5e20",
-                    onFinish: (response) => {
-                        const address = response.address;
-                        document.getElementById('connected-address').innerText = 'Connected: ' + address;
-                    }
-                });
-            } catch (error) {
-                console.error('Error connecting to wallet:', error);
-                alert('Failed to connect to wallet. Please try again.');
+            walletConnector = new WalletConnect({
+                bridge: "https://bridge.walletconnect.org", // Required
+                qrcodeModal: WalletConnectQRCodeModal,
+            });
+
+            // Check if connection is already established
+            if (!walletConnector.connected) {
+                // create new session
+                walletConnector.createSession();
             }
+
+            // Subscribe to connection events
+            walletConnector.on("connect", (error, payload) => {
+                if (error) {
+                    throw error;
+                }
+
+                // Get provided accounts and chainId
+                const { accounts } = payload.params[0];
+                const address = accounts[0];
+                document.getElementById('connected-address').innerText = 'Connected: ' + address;
+                document.getElementById('participate').style.display = 'block';
+            });
+
+            walletConnector.on("session_update", (error, payload) => {
+                if (error) {
+                    throw error;
+                }
+
+                // Get updated accounts and chainId
+                const { accounts } = payload.params[0];
+                const address = accounts[0];
+                document.getElementById('connected-address').innerText = 'Connected: ' + address;
+            });
+
+            walletConnector.on("disconnect", (error, payload) => {
+                if (error) {
+                    throw error;
+                }
+
+                // Delete walletConnector
+                walletConnector = null;
+                document.getElementById('connected-address').innerText = 'Not connected';
+                document.getElementById('participate').style.display = 'none';
+            });
         };
 
-        async function fetchBlockHeight() {
-            const response = await fetch(network.coreApiUrl + '/v2/info');
-            const data = await response.json();
-            document.getElementById('end-block-height').innerText = data.stacks_tip_height;
-        }
-
-        async function fetchPoolAmount() {
-            // Replace with actual logic to fetch pool amount
-            document.getElementById('pool-amount').innerText = 'Fetching...';
-            setTimeout(() => {
-                document.getElementById('pool-amount').innerText = '1000 STX'; // Example value
-            }, 1000);
-        }
-
-        async function submitTransaction(functionName, functionArgs) {
+        document.getElementById('participate').onclick = async function () {
+            const senderAddress = document.getElementById('connected-address').innerText.split(' ')[1];
+            const functionArgs = [];
+            
             const options = {
-                contractAddress: 'SP3NE50GEXFG9SZGTT51P40X2CKYSZ5CC4ZTZ7A2G', // Replace with your contract address
-                contractName: 'functions', // Replace with your contract name
-                functionName,
+                contractAddress,
+                contractName,
+                functionName: 'participate',
                 functionArgs,
                 network,
-                senderAddress: userSession.loadUserData().profile.stxAddress.testnet,
+                senderAddress,
             };
 
-            const transaction = await makeContractCall(options);
-            const result = await broadcastTransaction(transaction, network);
-            alert(`${functionName} executed: ${result.txid}`);
-        }
-
-        document.getElementById('buy-ticket-form').onsubmit = function (event) {
-            event.preventDefault();
-            const tokenContract = document.getElementById('token-contract').value;
-            const tokenAmount = parseInt(document.getElementById('token-amount').value);
-            if (isNaN(tokenAmount) || tokenAmount <= 0) {
-                alert('Please enter a valid amount.');
-                return;
+            try {
+                const transaction = await makeContractCall(options);
+                const result = await broadcastTransaction(transaction, network);
+                alert(`Transaction executed: ${result.txid}`);
+            } catch (error) {
+                console.error('Error participating in lottery:', error);
             }
-            submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(tokenAmount)]);
-            startNewRoundCountdown();
         };
-
-        function startNewRoundCountdown() {
-            roundEndTime = Date.now() + 120 * 1000; // Set end time to 2 minutes from now
-            startCountdown(120); // Start 2-minute countdown
-        }
-
-        function showWinner(blockHeight, winner) {
-            document.getElementById('end-block-height').innerText = blockHeight;
-            document.getElementById('winner').innerText = winner;
-            document.getElementById('winner-info').style.display = 'block';
-        }
-
-        function startCountdown(duration) {
-            clearInterval(countdownInterval);
-            let timer = duration, minutes, seconds;
-            countdownInterval = setInterval(() => {
-                const timeRemaining = roundEndTime - Date.now();
-                if (timeRemaining <= 0) {
-                    clearInterval(countdownInterval);
-                    endRoundAndSelectWinner(); // Automatically end the round and select the winner
-                    return;
-                }
-                minutes = parseInt(timeRemaining / 60000, 10);
-                seconds = parseInt((timeRemaining % 60000) / 1000, 10);
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-                document.getElementById('countdown').innerText = `${minutes}:${seconds}`;
-            }, 1000);
-        }
-
-        async function endRoundAndSelectWinner() {
-            // Call end-round function and get winner (simplified for demonstration)
-            await submitTransaction('end-round', []);
-            const blockHeight = await fetchBlockHeight();
-            const winner = 'mock-winner-address'; // Replace with actual logic to get the winner
-            showWinner(blockHeight, winner);
-        }
-
-        document.getElementById('btn-25').onclick = function () {
-            const amountInput = document.getElementById('token-amount');
-            const maxAmount = 1000; // Replace with actual logic to get max amount
-            amountInput.value = maxAmount * 0.25;
-        };
-
-        document.getElementById('btn-50').onclick = function () {
-            const amountInput = document.getElementById('token-amount');
-            const maxAmount = 1000; // Replace with actual logic to get max amount
-            amountInput.value = maxAmount * 0.5;
-        };
-
-        document.getElementById('btn-max').onclick = function () {
-            const amountInput = document.getElementById('token-amount');
-            const maxAmount = 1000; // Replace with actual logic to get max amount
-            amountInput.value = maxAmount;
-        };
-
-        fetchBlockHeight();
-        setInterval(fetchBlockHeight, 60000); // Update block height every minute
-
-        fetchPoolAmount();
-        setInterval(fetchPoolAmount, 60000); // Update pool amount every minute
-
-        startCountdown(120); // Start 2-minute countdown on page load for demonstration
     </script>
 </body>
 </html>
