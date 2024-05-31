@@ -14,16 +14,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-image: url('MEME CASINO.webp');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            background-color: #f0f2f5;
             margin: 0;
             padding: 20px;
         }
-        h1, h2 {
-            color: #fff;
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        h1 {
+            color: #333;
         }
         form {
             margin: 20px 0;
@@ -179,7 +175,7 @@
 
     <script>
         const { StacksTestnet } = window.StacksNetwork;
-        const { standardPrincipalCV, uintCV, principalCV, makeContractCall, broadcastTransaction, callReadOnlyFunction } = window.StacksTransactions;
+        const { standardPrincipalCV, uintCV, principalCV, makeContractCall, broadcastTransaction } = window.StacksTransactions;
         const { showConnect, UserSession, AppConfig } = window.StacksConnect;
 
         const appConfig = new AppConfig(['store_write', 'publish_data']);
@@ -222,21 +218,6 @@
             document.getElementById('end-block-height').innerText = data.stacks_tip_height;
         }
 
-        async function fetchPoolAmount() {
-            const functionArgs = []; // Adjust according to the smart contract function
-            const options = {
-                contractAddress: 'SP3NE50GEXFG9SZGTT51P40X2CKYSZ5CC4ZTZ7A2G', // Replace with your contract address
-                contractName: 'functions', // Replace with your contract name
-                functionName: 'get-pool-amount', // Replace with the actual function to get pool amount
-                functionArgs,
-                network,
-            };
-
-            const result = await callReadOnlyFunction(options);
-            poolAmount = parseInt(result.value); // Assuming result.value contains the amount
-            updatePoolAmountDisplay();
-        }
-
         function updatePoolAmountDisplay() {
             const poolAmountContainer = document.getElementById('pool-amount');
             poolAmountContainer.innerText = `${poolAmount} STX`;
@@ -255,13 +236,15 @@
             const transaction = await makeContractCall(options);
             const result = await broadcastTransaction(transaction, network);
             alert(`${functionName} executed: ${result.txid}`);
-            await fetchPoolAmount();
         }
 
         document.getElementById('buy-ticket-form').onsubmit = function (event) {
             event.preventDefault();
             const tokenContract = document.getElementById('token-contract').value;
             const tokenAmount = parseInt(document.getElementById('token-amount').value);
+            const tokenName = document.getElementById('token-contract').selectedOptions[0].text;
+            poolAmount += tokenAmount;
+            updatePoolAmountDisplay();
             submitTransaction('buy-ticket', [principalCV(tokenContract), uintCV(tokenAmount)]);
         };
 
@@ -320,7 +303,6 @@
         setInterval(fetchBlockHeight, 60000); // Update block height every minute
 
         startCountdown(120); // Automatically start 2-minute countdown
-        fetchPoolAmount(); // Fetch initial pool amount
     </script>
 </body>
 </html>
