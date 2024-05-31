@@ -36,28 +36,28 @@
   (if (var-get lottery-open)
     (if (not (has-time-elapsed (var-get lottery-start-block)))
       (let ((sender tx-sender))
-        (if (map-get? token (var-get token-addresses))
-          (let ((token-address (unwrap! (map-get token (var-get token-addresses)) (err u108)))) ;; Error: Unsupported token
-            (if (>= (ft-get-balance token-address sender) (var-get ticket-price))
-              (if (< (len (var-get tickets)) u100)
-                (begin
-                  (ft-transfer? token-address (var-get ticket-price) sender (as-contract tx-sender))
-                  (var-set tickets (try! (append-principal (var-get tickets) sender)))
-                  (ok u0)
-                )
-                (err u107) ;; Error: Ticket limit reached
+        (match (map-get token (var-get token-addresses))
+          token-address
+          (if (>= (ft-get-balance token-address sender) (var-get ticket-price))
+            (if (< (len (var-get tickets)) u100)
+              (begin
+                (try! (ft-transfer? token-address (var-get ticket-price) sender (as-contract tx-sender)))
+                (var-set tickets (append (var-get tickets) (list sender)))
+                (ok u0)
               )
-              (err u101) ;; Error: Insufficient funds
+              (err u107) ;; Error: Ticket limit reached
             )
+            (err u101) ;; Error: Insufficient funds
           )
+          (err u109) ;; Error: Token not supported
         )
-        (err u109) ;; Error: Token not supported
+      )
+      (begin
+        (var-set lottery-open false)
+        (err u100) ;; Error: Lottery is closed
       )
     )
-    (begin
-      (var-set lottery-open false)
-      (err u100) ;; Error: Lottery is closed
-    )
+    (err u100) ;; Error: Lottery is closed
   )
 )
 
@@ -76,11 +76,9 @@
     (if (not (var-get lottery-open))
       (let ((ticket-list (var-get tickets)))
         (if (> (len ticket-list) u0)
-          (let ((block-height (block-height)))
-            (let ((winner (element-at ticket-list (mod block-height (len ticket-list)))))
-              (var-set winner (some winner))
-              (ok winner)
-            )
+          (let ((winner (element-at ticket-list (mod (block-height) (len ticket-list)))))
+            (var-set winner (some winner))
+            (ok winner)
           )
           (err u104) ;; Error: No tickets sold
         )
@@ -94,29 +92,13 @@
 (define-public (claim-prize)
   (match (var-get winner)
     winner-principal
-      (if (is-eq tx-sender winner-principal)
-        (let ((prize (* (var-get ticket-price) (len (var-get tickets)))))
-          (ft-transfer? (unwrap! (map-get token (var-get token-addresses)) (err u108)) prize (as-contract tx-sender) winner-principal)
-          (ok u0)
-        )
-        (err u105) ;; Error: Not the winner
+    (if (is-eq tx-sender winner-principal)
+      (let ((prize (* (var-get ticket-price) (len (var-get tickets)))))
+        (try! (ft-transfer? (unwrap! (map-get token (var-get token-addresses)) (err u108)) prize (as-contract tx-sender) winner-principal))
+        (ok u0)
       )
-    none (err u106) ;; Error: No winner drawn
-  )
-)
-
-(define-private (append-principal (ticket-list (list 100 principal)) (ticket principal))
-  (if (< (len ticket-list) u100)
-    (ok (append-helper ticket-list ticket 0 (len ticket-list)))
-    (err u107) ;; Error: Ticket limit reached
-  )
-)
-
-(define-private (append-helper (ticket-list (list 100 principal)) (ticket principal) (index uint) (len uint))
-  (if (>= index len)
-    (list ticket)
-    (let ((current (nth index ticket-list)))
-      (append (list current) (append-helper ticket-list ticket (+ index 1) len))
+      (err u105) ;; Error: Not the winner
     )
+    none (err u106) ;; Error: No winner drawn
   )
 )
