@@ -1,5 +1,5 @@
 # Meme-Lottery
-Bridging the gap one meme at a time.
+A Stacks blockchain project for the Easy A Hackathon during Consensus 2024. Bridging the gap one meme at a time.
 
 Tokens:
 
